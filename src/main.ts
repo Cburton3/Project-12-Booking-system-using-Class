@@ -1,7 +1,5 @@
 import { reservas } from "./constants";
 
-//objeto es calcular el subtotal (precio sin IVA) y el total de las reservas que ha hecho un cliente.
-
 /* Caso 1
 En el caso de un cliente particular:
 
@@ -33,18 +31,20 @@ class Reservas {
   }
 
   calcularSubtotal(): number {
-    // const desayuno: number = this.desayuno ? 
-    //   this.noches * this.pax * 15 : 0; 
     const desayuno = (): number => {
       let precio = 0;
       if (this.desayuno) {
         precio = this.noches * this.pax * 15;
       }
-      return precio
+      return precio;
     };
     const multiplier: number = this.tipoHabitacion === "suite" ? 150 : 100;
     let personaAdicional: number = this.pax > 1 ? this.pax - 1 : 0;
-    return this.noches * multiplier + personaAdicional * 40 * this.noches + desayuno();
+    return (
+      this.noches * multiplier +
+      personaAdicional * 40 * this.noches +
+      desayuno()
+    );
   }
 
   calcularTotal(): number {
@@ -70,11 +70,13 @@ Crear una clase que herede de la primera que cubra el caso del cálculo de total
 */
 
 class Tour extends Reservas {
-  //additional params here
-
-  constructor(tipoHabitacion: "standard", pax: number, noches: number, desayuno: boolean) {
+  constructor(
+    tipoHabitacion: "standard",
+    pax: number,
+    noches: number,
+    desayuno: boolean
+  ) {
     super(tipoHabitacion, pax, noches, desayuno);
-    //additional params here
   }
   calcularSubtotal(): number {
     const desayuno = (): number => {
@@ -82,10 +84,13 @@ class Tour extends Reservas {
       if (this.desayuno) {
         precio = this.noches * this.pax * 15;
       }
-      return precio
+      return precio;
     };
     let personaAdicional: number = this.pax > 1 ? this.pax - 1 : 0;
-    return (this.noches * 100 + personaAdicional * 40 * this.noches + desayuno()) * 0.85;
+    return (
+      (this.noches * 100 + personaAdicional * 40 * this.noches + desayuno()) *
+      0.85
+    );
   }
 }
 
@@ -106,11 +111,40 @@ En el constructor de la clase base, introduce la lista de precios de habitacione
 
 //Parte Adidicional
 
-const reservasArray = reservas.map(
-  reserva => new Reservas(reserva.tipoHabitacion, reserva.pax, reserva.noches, reserva.desayuno)
-);
+import { Reserva } from "./model";
 
-reservasArray.forEach(reserva => {
-  console.log('Subtotal:', reserva.calcularSubtotal())
-  console.log('Total:', reserva.calcularTotal())
-})
+console.log("PARTE ADICIONAL");
+
+class Booking {
+  tipoHabitacion: "standard" | "suite"; //this is not assigning a string, its assigning ONLY these 2 strings
+  pax: number;
+  noches: number;
+  desayuno: boolean;
+
+  constructor(reserva: Reserva) {
+    this.tipoHabitacion = reserva.tipoHabitacion;
+    this.pax = reserva.pax;
+    this.noches = reserva.noches;
+    this.desayuno = reserva.desayuno;
+  }
+
+  calcularSubtotal(): number {
+    const desayuno = this.desayuno ? this.noches * this.pax * 15 : 0;
+    const multiplier = this.tipoHabitacion === "suite" ? 150 : 100;
+    const personaAdicional = this.pax > 1 ? this.pax - 1 : 0;
+
+    return (
+      this.noches * multiplier + personaAdicional * 40 * this.noches + desayuno
+    );
+  }
+
+  calcularTotal(): number {
+    return this.calcularSubtotal() * 0.21 + this.calcularSubtotal();
+  }
+}
+
+reservas.forEach((reserva) => {
+  const reservaInstance = new Booking(reserva);
+  console.log("Subtotal:", reservaInstance.calcularSubtotal());
+  console.log("Total:", reservaInstance.calcularTotal());
+});
